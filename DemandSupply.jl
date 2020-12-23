@@ -45,7 +45,7 @@ The slider below controls the number of producers = number of consumers in the m
 """
 
 # ╔═╡ 3a84b6fc-415a-11eb-39e9-17acd55bab74
-md""" Number of Producers and Consumers $(@bind num_players Slider(5:100, show_value=true))"""
+md""" Number of Producers and Consumers $(@bind num_players Slider(5:100, show_value=true, default=100))"""
 
 # ╔═╡ ca3c0d9e-4154-11eb-11bf-a9b0a3a48040
 begin
@@ -81,7 +81,7 @@ Now let's allow the producers and consumers to start trading. Control the speed 
 """
 
 # ╔═╡ 1d007b74-415b-11eb-1795-77f7221ae017
-md""" Simulation Speed $(@bind timesteps Clock(1))"""
+md""" Simulation Speed $(@bind timesteps Clock(0.1))"""
 
 # ╔═╡ 55965e12-41ac-11eb-2bc6-e5c3d4cef731
 begin
@@ -195,16 +195,16 @@ The green line is the supply curve shifted after tax.
 """
 
 # ╔═╡ 33c230c2-41b6-11eb-3626-e3741c798f1b
-md""" Tax Amount $(@bind tax Slider(1:25, show_value=true))"""
+md""" Tax Amount $(@bind tax Slider(0:0.01:0.25, show_value=true))"""
 
 # ╔═╡ 246aba7c-41b6-11eb-03b0-3fe2498642fa
 begin
-	producers2 = producers .+ (tax/100)
+	producers2 = producers .+ tax
 	println("Tax")
 end
 
 # ╔═╡ 8f0b880c-41b6-11eb-1674-a740ecbdf88a
-md""" Simulation Speed $(@bind timesteps2 Clock(1))"""
+md""" Simulation Speed $(@bind timesteps2 Clock(0.1))"""
 
 # ╔═╡ cac7e9a4-41b5-11eb-2903-6986af777e41
 begin
@@ -233,7 +233,7 @@ begin
 				splice!(cons_left, cons_left_index)
 				
 				cons_surplus2 += (consumers[pair[1]] - cons_expectations[pair[1]])
-				prod_surplus2 += (prod_expectations[pair[2]] - producers[pair[2]] - (tax/100))
+				prod_surplus2 += (prod_expectations[pair[2]] - producers[pair[2]] - (tax))
 				timeout = 0
 
 			else
@@ -247,7 +247,7 @@ begin
 						splice!(cons_left, cons_left_index)
 						
 						cons_surplus2 += (consumers[pair[1]] - cons_expectations[pair[1]])
-						prod_surplus2 += (prod_expectations[pair[2]] - producers[pair[2]] - (tax/100))
+						prod_surplus2 += (prod_expectations[pair[2]] - producers[pair[2]] - (tax))
 					end
 					missing
 				else
@@ -286,7 +286,7 @@ begin
 	plot!(index, producers2, label = "Producers + Tax", color = "green")
 	plot!(index, consumers, xlabel="Quantity", ylabel = "Price", title="Supply Demand Market", label = "Consumers", color="orange")
 	scatter!(index, cons_expectations, m=:o, color="orange", label= "Consumer Prices")
-	scatter!(index, prod_expectations .- tax/100, m=:o, color="blue", label = "Producer Prices")
+	scatter!(index, prod_expectations .- tax, m=:o, color="blue", label = "Producer Prices")
 	
 	p4 = bar(["Producers", "Consumers", "Market"], [prod_surplus2, cons_surplus2, prod_surplus2 + cons_surplus2], legend = false, title="Surplus", size=(600, 800))
 	
@@ -318,16 +318,16 @@ Below is the slider for the price floor (which corresponds to the green line of 
 """
 
 # ╔═╡ 5437f18c-41d6-11eb-2724-7ba6de5b892c
-md""" Price Floor $(@bind floor Slider(0:100, show_value=true))"""
+md""" Price Floor $(@bind floor Slider(0:0.01:1, show_value=true))"""
 
 # ╔═╡ df2887cc-41d9-11eb-022e-0d70b44296b7
 begin
-	floors = [floor/100 for i in 1:length(index)]
+	floors = [floor for i in 1:length(index)]
 	println("Initialized PriceFloor")
 end
 
 # ╔═╡ 84f8da0c-41d6-11eb-2617-1143f5dbf53f
-md""" Simulation Speed $(@bind timesteps3 Clock(1))"""
+md""" Simulation Speed $(@bind timesteps3 Clock(0.1))"""
 
 # ╔═╡ 8fc46eba-41d6-11eb-2cf5-3d6e2d3f7f3d
 begin
@@ -348,7 +348,7 @@ begin
 			pair[1] = cons_left[cons_left_index]
 			pair[2] = prods_left[prod_left_index]
 
-			if cons_expectations[pair[1]] >= (prod_expectations[pair[2]]) && cons_expectations[pair[1]] > floor/100
+			if cons_expectations[pair[1]] >= (prod_expectations[pair[2]]) && cons_expectations[pair[1]] > floor
 				cons_expectations[pair[1]] -= 0.01
 				prod_expectations[pair[2]] += 0.01
 			
@@ -360,7 +360,7 @@ begin
 				timeout = 0
 
 			else
-				if consumers[pair[1]] > (producers[pair[2]]) && (consumers[pair[1]] > (prod_expectations[pair[2]])) && consumers[pair[1]] > floor/100
+				if consumers[pair[1]] > (producers[pair[2]]) && (consumers[pair[1]] > (prod_expectations[pair[2]])) && consumers[pair[1]] > floor
 					
 					if (consumers[pair[1]] - cons_expectations[pair[1]]) > (prod_expectations[pair[2]] - producers[pair[2]])
 						cons_expectations[pair[1]] += 0.01
@@ -389,8 +389,8 @@ begin
 		for i in 1:length(prods_left)
 			
 			j = prods_left[i]
-			if prod_expectations[j] <= floor/100
-				prod_surplus3 += (floor/100) - producers[j]
+			if prod_expectations[j] <= floor
+				prod_surplus3 += (floor) - producers[j]
 				prod_expectations[j] += 0.01
 			else
 				prod_expectations[j] -= 0.01
@@ -439,14 +439,14 @@ The slider below allows you to control the price ceiling (green line).
 """
 
 # ╔═╡ 2098b5ce-41e9-11eb-2d68-a56b52a114fa
-md""" Price Ceiling $(@bind ceil Slider(0:100, show_value=true, default=100))"""
+md""" Price Ceiling $(@bind ceil Slider(0:0.01:1, show_value=true, default=1))"""
 
 # ╔═╡ 48e54722-41e9-11eb-0938-af78a0f6770a
-md""" Simulation Speed $(@bind timesteps4 Clock(1))"""
+md""" Simulation Speed $(@bind timesteps4 Clock(0.1))"""
 
 # ╔═╡ 31988b6a-41e9-11eb-33e2-d59ff1e77477
 begin
-	ceils = [ceil/100 for i in 1:length(index)]
+	ceils = [ceil for i in 1:length(index)]
 	println("Initialized PriceFloor")
 end
 
@@ -469,7 +469,7 @@ begin
 			pair[1] = cons_left[cons_left_index]
 			pair[2] = prods_left[prod_left_index]
 
-			if cons_expectations[pair[1]] >= (prod_expectations[pair[2]]) && prod_expectations[pair[2]] < ceil/100
+			if cons_expectations[pair[1]] >= (prod_expectations[pair[2]]) && prod_expectations[pair[2]] < ceil
 				cons_expectations[pair[1]] -= 0.01
 				prod_expectations[pair[2]] += 0.01
 			
@@ -481,7 +481,7 @@ begin
 				timeout = 0
 
 			else
-				if (consumers[pair[1]] > (prod_expectations[pair[2]])) && prod_expectations[pair[2]] < ceil/100
+				if (consumers[pair[1]] > (prod_expectations[pair[2]])) && prod_expectations[pair[2]] < ceil
 
 					if (consumers[pair[1]] - cons_expectations[pair[1]]) > (prod_expectations[pair[2]] - producers[pair[2]])
 
@@ -524,7 +524,7 @@ begin
 		
 		for i in 1:length(cons_left)
 			j = cons_left[i]
-			if consumers[j] < ceil/100
+			if consumers[j] < ceil
 				cons_expectations[j] += 0.00
 			else
 				cons_expectations[j] += 0.001 / (length(cons_left) / 100)	

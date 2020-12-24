@@ -17,10 +17,8 @@ end
 begin
 	import Pkg
 	Pkg.activate(mktempdir())
-	Pkg.add([
-		"PlutoUI",
-		"Plots",
-		])
+	Pkg.add(["PlutoUI",
+		"Plots"])
 
 	using PlutoUI
 	using Plots
@@ -29,19 +27,25 @@ end
 
 # ╔═╡ de91c494-41bc-11eb-3d49-6d14bfde3453
 md"""
-# Microeconomics - Simulated
+# Microeconomics - Demand and Supply Simulated
 Ayush Goel
 
-Here, I want to try and make simulations to get a feel for how the microeconomics principles actually work, and also turn a few knobs to see how that impacts the market. This simulation is interactive (not in the html version), so you can change the values using the interactive elements and see the market play out.
+In Microeconomics, the concept of demand and supply representing the market was a bit confusing to me. I didn't really understand how all producers and consumers would end up coming to a single consensus, and form a stable equilibrium, rather than constantly changing the prices. So I thought of making a simulation to see what actually happens. 
+
+In this simulation, I made sure that every consumer and producer starts off with a completely random idea on what the right price should be. It turns out that all producers and consumers actually end up converging to the exact same point! Exactly what microeconomics predicts, so this theory really does work in practice. What's even more interesting is that no matter what consumer and producers initially think the price should be, they will update their beliefs and always end up at the same point!
+
+Here, I want to simulate a few basic concepts related to demand and supply: market equilibrium, taxes, price floors and price ceils. 
+
+*This is the interactive version of the simulation. All sliders and buttons are interactive and can be changed by the viewer to see the impact on the simulation.*
 """
 
 # ╔═╡ bb89659a-41de-11eb-0956-2d9707f79ae3
 md"""
-The first task is to generate the supply and demand curves. On this webpage, the supply and demand curves will only represent the limit prices for consumers and producers. This means that a consumer will never go higher than their corresponding price on the demand curve, and a producer will never go lower than their corresponding price on the supply curve. The individual prices will be represented with dots (shown in the simulations below).
+The first task is to generate the supply and demand curves. In my simulation, the supply and demand curves will only represent the limit prices for consumers and producers. This means that if a consumer has a limit of $1.0, they would be happy purchasing it for a lower price, but will never cross $1.0. Similarly, if a producer has a limit of $0.50, he will be happy selling it for a higher price, but will never go lower than this.
 
-For now, let's assume that the price of the good varies from $0 - $1. For the demand curve, we can simply generate random numers between 0 and 1 (with equal probability) and then sort them in descending order. For the supply curve, we do the same but sort it in ascending order. This should give us a representative market along with appropriate curves.
+For now, let's assume that the price of the good varies from $0 - $1. For the demand curve, we can simply generate random numers between 0 and 1 (with equal probability) and then sort them in descending order. This will give a downward sloping curve. For the supply curve, we do the same but sort it in ascending order (to make it upward sloping). This should give us a representative market along with appropriate curves.
 
-The slider below controls the number of producers = number of consumers in the market. 100 means that there are 100 producers and 100 consumers. A larger market size will better show what economics models predict.
+The slider below controls the number of producers = number of consumers in the market. 100 means that there are 100 producers and 100 consumers. A larger market size for the simulation will better show what economics models predict.
 """
 
 # ╔═╡ 3a84b6fc-415a-11eb-39e9-17acd55bab74
@@ -63,25 +67,14 @@ begin
 	plot!(index, consumers, xlabel="Quantity", ylabel = "Price", title="Supply Demand Market", label = "Consumers")
 end
 
-# ╔═╡ 3124e682-41bd-11eb-001a-6d6ce348f0b1
-md""" ## Market Equilibrium
+# ╔═╡ a414898a-45ba-11eb-0161-5b519c16d585
+md"""
+Apart from this, consumers and producers also have expectations about what the market price should be (also called producer and consumer prices). This will be random value within their limit, but not necessarily at their limit. To take an example, if you as a consumer can afford to spend $100 on buying a chair (this is your limit), it doesn't mean that you think this is the fair value of the chair. You might bargain as much as possible and be rigid to buy it at any price above $50 (this is your expectation). 
 
-This is the first main concept learnt in microeconomics. The equilibrium is where the demand curve intersects the supply curve, leading to an equilibrium price and quantity. But consumers and producers aren't born with the right price in mind. They have different expectations of the price, and are only limited by the curves. Hence, we need the principle of the invisible hand, which essentially states that an unseen force moves the entire free market economy to reach the equilibrium. 
+The collective expectations of consumers and producers is what determines the market price. We will represent the expectations with dots (they are color coded to match whether they are consumers or producers).
 
-Let's actually see this in action. Here are the rules:
 
-1. Consumers and Producers have their own prices (which are different from the curves). These represent the expectations they have for the right price.
-2. If a consumer and producer meet, they will compare their prices (not the curve values), and if the consumer can pay more than the producer wants, the transaction occurs.
-3. If a transaction occurs in the above way, then consumers decrease their prices (expectations) since they got a deal easily, and producers increase their prices (expectations) since they also got a deal too easily.
-4. If the consumer has a lower price than the producer, but is still able to pay (based on the curve) enough money, then they do some bargaining and the trade still occurs. However, this time, the producer decreases his price (expectation) since he had to bargain to get a deal, and the consumer increases his price (expectation) also since he had to bargain to get a deal.
-5. If a producer is not able to make a trade in a day, then they decrease their price, since it is too high for consumers.
-6. If a consumer is not able to make a trade in a day, then they increase their price, since it is too low for producers.
-
-Now let's allow the producers and consumers to start trading. Control the speed of the simulation using the dial below. 
 """
-
-# ╔═╡ 1d007b74-415b-11eb-1795-77f7221ae017
-md""" Simulation Speed $(@bind timesteps Clock(0.1))"""
 
 # ╔═╡ 55965e12-41ac-11eb-2bc6-e5c3d4cef731
 begin
@@ -89,6 +82,48 @@ begin
 	prod_expectations = clamp.(producers .+ abs.((0.2 .* rand(length(producers)))), 0, 10)
 	println("")
 end
+
+# ╔═╡ 24f5cf62-45bb-11eb-3961-f982843bfa88
+let
+	plot(index, producers, label = "Producers")
+	plot!(index, consumers, xlabel="Quantity", ylabel = "Price", title="Supply Demand Market", label = "Consumers")
+	scatter!(index, cons_expectations, m=:o, color="orange", label= "Consumer Prices")
+	scatter!(index, prod_expectations, m=:o, color="blue", label = "Producer Prices")
+end
+
+# ╔═╡ 37408ee8-45bb-11eb-16fe-473ae98a2700
+md"""
+As you can see, no blue dot goes below the blue line (corresponding to supply curve) and no orange dot goes above the orange line (corresponding to the demand curve).
+
+The dots seem randomly spread because they are. We haven't run the simulation yet, so the dots haven't gotten a chance to converge yet.
+
+In this simulation, we will simulate the market over multiple trading days. Now let's lay down the rules for how each trading day in the market will work:
+
+1. A random consumer and producer will be paired with each other. If the consumer's expectation (or price) is more than the producer's expectation (or price), then they will make a trade. 
+	If such a trade happens, then the producer will increase his expectation (because he got a deal so easily, so can increase his price), whereas the consumer will reduce his expectation (he also got a deal so easily, so could probably get away paying a little less).
+2. If the consumer's expectation is less than the producer's expectation, then we check if the consumer's limit is more than the producer's limit. If it is, then they do some bargaining and still make a trade (since they are still both better off making a trade).
+	If such a trade happens, then the producer will decrease his expectation (he had to bargain to get a deal, and bargaining is a risky affair). On the other hand, the consumer will increase his expectation (same reason, he doesn't want to risk not buying something, even though he can afford to).
+
+3. Trading continues like this until no more trades can be made.
+	Now, any producers who have not made a trade will decrease their expectations a lot (they didn't get a sale so have no choice but to reduce prices). Any consumers who didn't make a trade will increase their expectations a lot (they could buy anything, so have no choice but to increase prices and attract producers).
+
+**Remember that throughout, the expectations will always be clamped to the limits (i.e. a producer's expectation will never be lower than his ability, and a producer's expectation will never be more than his ability).**
+
+"""
+
+# ╔═╡ 3124e682-41bd-11eb-001a-6d6ce348f0b1
+md""" ## Market Equilibrium
+
+This is the first main concept learnt in microeconomics. 
+
+According to the theory, the equilibrium is where the demand curve intersects the supply curve (the orange line intersecting the blue line). 
+
+So let's see if that is what happens in our simulation. Press the start button to start the simulation. The number 0.1 means that it takes 0.1 seconds for 1 trading day to be executed. Keeping it at this number will allow you to best see the market progress. Going below 0.1 may make the graph lag and you may not see the graph update as it should.
+
+"""
+
+# ╔═╡ 1d007b74-415b-11eb-1795-77f7221ae017
+md""" Simulation Speed $(@bind timesteps Clock(0.1))"""
 
 # ╔═╡ 36fc50ee-415a-11eb-239f-8308d348bd3a
 begin
@@ -179,7 +214,17 @@ end
 
 # ╔═╡ 339f9e22-41be-11eb-1ea9-1b2583945bf6
 md"""
-If it ran right (which it should have, if it didn't, allow it to run for some more time. Try changing the speed to 0.1 to make it go faster), then you should have seen that all of the consumers and producers participating should have had their prices move towards the market price or equilibrium (right where the demand and supply curve intersect)! This is the invisible hand in practice. Everyone had random prices in mind, but after trading and updating the prices they had, everyone reached the same market price.
+After running it for a while, you should be able to see 2 clear trends:
+
+1. All of the dots on the right of the intersection (between demand and supply curves) have their prices stuck to their limits.
+
+	The reason is that the consumers on the right simply can't afford to pay the market price. They adjust their expectations to be as high as possible (their limit), but still don't get a deal. That's why their dots are stuck to the curve. Similarly, the producers on the right simply can't sell a product at the market price, because their limit is higher than that. Thus, they reduce their expectations as much as possible, but can't beyond a point.
+
+2. All of the dots on the left of the intersection form a straight line, with the height = to the height of the intersection.
+
+	This is exactly what equilibrium is. All producers and consumers can to the same consensus as to what the price should be. Notice how in the simulation, every producer and consumer was designed to act in a self-interested way. There was no collusion or any thought about society, yet they all figure out that the equilibrium price is the best possible (this is the principle of the Invisible Hand). 
+
+Also note the value of the surplus at the end, we will use it to compare the effect of different government policies later.
 """
 
 # ╔═╡ 6e24a652-41be-11eb-3699-f553c77ff31b
@@ -189,9 +234,15 @@ md"""
 
 ## Taxes
 
-Now let's add a tax to the mix. The slider below will allow you to control the amount of tax. This will be an indirect specific tax, and will be levied on the consumers. Thus, once a trade happens, the consumer will lose the tax amount, so would naturally want a higher price from consumers.
+Now let's examine the impact of a government policy on the free market. It is repeated time and again that any intervention in free markets (often) leads to inefficiencies in the market. Let's simulate this and see if the claim is right.
 
-The green line is the supply curve shifted after tax.
+The first government policy we will examine is tax. This tax is special as it is only charged when a good is sold. Also, here we will assume that the government expects the producers to pay the tax at the end of the day (the producers are well aware of this policy change).
+
+The slider below will allow you to control the amount of tax levied. Now, a thing to note is that the abilities of the producers has changed. For example, let's assume that there is a tax of 0.1. Now, originally a producer who had a limit of 0.2 could have sold a product at 0.21 and still gone home with a profit. But now, if he sells the same product for 0.21, he has to pay the tax of 0.1, so goes home with only 0.11, which is less than his limit of 0.2. Thus, every producers limit increases by the value of the supply curve. Why? Because once they make the trade at this price, they pay away the tax and end up at the original supply curve limit.
+
+Let's denote this new limit (Supply curve + tax) with a green line.
+
+Finally, let's run the simulation and see what happens:
 """
 
 # ╔═╡ 33c230c2-41b6-11eb-3626-e3741c798f1b
@@ -296,11 +347,11 @@ end
 
 # ╔═╡ 4bb6a13c-41d3-11eb-036d-3528e31d7668
 md"""
-If you let the simulation run for some time, you can see that the consumer and producer prices have diverged (exactly by the amount of the tax), which is exactly what is predicted by economics principles. Also try changing the tax after the new equilibrium is reached, and you can see how the consumers and producers adjust to the new equilibrium
+Now when we run the simulation, the consumer and producer prices form two separate lines! They are no longer the same line but have diverged. The reason is the tax. Consumers pay a price along their line, but producers pay the tax afterwards, and end up at the lower price. 
 
-Another thing to note is that the total market surplus has decreased from before (check the graph above and compare it to this one). This is also what is expected from economic theory. As the amount of tax levied is increased, the total surplus will also decrease.
+Infact, if you look carefully, the lines are separated exactly by the value of the tax. One thing to note is that the producers don't pay for the entire tax. To verify this, look at the line for consumers. In the free market, it was close to around 0.5, but now (a higher tax amount will show this more clearly) the consumers pay a price significantly higher than 0.5. Thus, the tax is "shared" by consumers and producers.
 
-This shows why producers and consumers get different prices and how they actually stabilize in a real market situation.
+Also compare the surpluses. If you see, the market surplus is now overall less than in the free market. This is what is meant by how government policies negatively impact the market. Producers and consumers are both unhappy with the tax.
 """
 
 # ╔═╡ 7ff1d5a8-41dc-11eb-330e-47864080ac5c
@@ -310,11 +361,16 @@ md"""
 
 # ╔═╡ c204a204-41dc-11eb-0bed-57edfd530122
 md"""
-Now let's try implementing Price Floors. The logic here is going to be simple. Trading will continue on as it was before, but will have one resitriction: if the consumer price is not more than the price floor, then the trade will not occur.
+Price Floors are another interesting form of government intervention. Here, the government essentially enforces a regulation where no transaction in the market can occur below the price floor. It is essentially the minimum price a transaction can go. 
 
-Another subtle point is that in product markets the government generally comes in and buys the surplus quantity. Implementing that is simple: if a producer is not able to make a trade, but its price is less than the floor, then the goverment will buy it, and they won't have the penalty of not selling anything. But if the price is more than the floor, then the government won't help.
+However, price floors are not as straightforward as taxes as we even have to consider what to do with the surplus.
 
-Below is the slider for the price floor (which corresponds to the green line of the graph). You can change it and watch the simulation adapt.
+	When a price floor is placed above market price, more producers are able to produce and sell at that minimum price, but less consumers are able to buy. Thus, too much of the good is produced, and something has to be done. In the caase of product markets, the government often just buys all of this surplus, which is what we will simulate here.
+
+The logic here is going to be simple. Trading will continue on as it was before, but will have one resitriction: if the consumer price is not more than the price floor, then the trade will not occur. This is because if the consumer price is lower, then the trade becomes illegal (for the sake of simplicity, we won't consider any underground markets where such a transaction is possible, only a fully legal and regulated market).
+
+
+Below is the slider for the price floor (which corresponds to the green line of the graph). You can change it and watch the simulation adapt. (the price floor will only matter if placed above the equilibrium price).
 """
 
 # ╔═╡ 5437f18c-41d6-11eb-2724-7ba6de5b892c
@@ -420,20 +476,30 @@ end
 
 # ╔═╡ 6ca6020c-41dd-11eb-2d8f-316c599b2a1f
 md"""
-First thing we notice is that as long as the price floor is below the equilibrium price, nothing happens. This is because the minimum price at which a product is being sold is still higher than the floor. It gets more interesting when the floor is above market price.
 
-After a price floor, you notice that less consumers (orange dots) are participating in a trade, which is because they can't afford the good after the floor. This leads to a decrease in consumer surplus. On the other hand, more blue dots are able to participate (seen from how the entire green line is filled with dots) which is because the government buys the surplus created from the price floor. 
+If you play with the simulation, you should notice 2 different scenarios:
 
-Either way, the total market surplus still decreases, which is again what microeconomics suggests.
+1. If the price floor is below the market price, nothing happens and it is essentially the free market all over again.
+	This intuitively makes sense as consumers and producers are already making transactions at a price higher than the price floor, so it doesn't make a difference to them.
 
-So we can see that so far, all of our simulations fall in line with microeconomics principles, which goes to show how good of a model Demand and Supply is.
+2. When the price floor is above market price, a large number of producers start participating and very few consumers.
+	This also makes sense as now when the price floor is above the market price, more producers are able to produce and sell. Producers don't even need to decrease their expectations when a consumer doesn't buy from them since the government will have to do it at the price floor anyway.
+
+Looking at the surplus, we see that the producer surplus has gone up dramatically, but the consumer surplus has gone down even more. That's why, in the end the market surplus is still less than the free market economy.
+
 """
 
 # ╔═╡ ed48dba8-41ee-11eb-0a6e-a79198da629f
 md"""
 ## Price Ceiling
 
-Price Ceiling will have a similar logic as price floors, except now the producers can't expect a price higher than the price ceiling. Here, we will assume no other government intervention (the government doesn't fullfill the shortage).
+Price Ceiling are exactly the opposite as price floors. Instead of having a minimum transaction price, there is now a maximum transaction price.
+
+In Price Floors, we realized that there was a surplus created since more producers are able to produce. In price ciels, there is a shortage created, as now many more consumers can afford to buy the good, but there are very few producers.
+
+Unlike the Price Floor, the government can't easily step in and fix this shortage. If they tried, they would have to find producers to buy from or hire them, but they would rather sell it in the market! However, there is still an opportunity to import the good.
+
+For this reason, we will just assume that the government doesn't step in.
 
 The slider below allows you to control the price ceiling (green line).
 """
@@ -548,11 +614,29 @@ end
 
 # ╔═╡ d86b02c2-41ee-11eb-3bc0-b1e33a80922f
 md"""
-Once again, we notice that if the price ceil is above market price, then nothing significant happens. But if we lower it below market price, it becomes much better.
+Once again, we notice 2 different cases in the simulation:
 
-Side Note: The simulation sometimes breaks for very low values of price ceil (<10) as there are not enough producers left for the simulation to be accurate anymore.
+1. If the price ceil is above the market price, nothing changes.
+	This happens for the exact same reason as the price floor. Producers are anyways selling the product at a price lower than the price floor, so there is no issue.
 
-We see that a larger number of consumers rush to the price ceil, and that causes a shortage. Also, fewer producers are not able to sell the product, so the producer surplus decreases.
+2. If the price ceil is below the market price, a large number of consumers want to participate, but only a few producers are left. 
+
+	This seems intuitive as well since now the product's price falls within the limits for more consumers. A think to note here is that just because all of the consumers expectations fall to the price ceil, it doesn't mean that all of them are able to buy the good, only some are. In fact, in the price floor, everyone had settled quickly since the government was buying the excess. Here, there is still some movement, so this is slightly more unstable.
+
+While you would expect consumer surplus to increase drastically, it doesn't. This is again due to the fact that the government isn't filling in the shortage, so not all consumers get the benefit of the low price. Overall, the market surplus also goes down.
+"""
+
+# ╔═╡ 49e61a86-45de-11eb-224d-d1ad42f92225
+md"""
+
+In all of the different scenarios we have simulated here, the end outcome has matched what microeconomics predicts. I think this shows how good a model demand and supply is, and gives a better understanding of the principle of the Invisible hand, and how everyone comes to the same consensus.
+
+## Limitations:
+
+1. We have built a very simplified decision framework for consumers and producers. In reality, the thought process may be much more complicated. For example, in a real market, there is a chance that no bargaining will happen, so the producer will never reduce their prices. 
+2. In reality, people are also biased. This means that sometimes, people wouldn't update their beliefs in the right way, or some irrelevant information may factor into their prices. For example, the anchoring bias may completely hinder the expectations for consumers and producers, so they may find it hard to converge.
+
+A more detailed simulation could be made, but I think this illustrates the model well enough, while being simple.
 """
 
 # ╔═╡ Cell order:
@@ -562,9 +646,12 @@ We see that a larger number of consumers rush to the price ceil, and that causes
 # ╟─3a84b6fc-415a-11eb-39e9-17acd55bab74
 # ╟─ca3c0d9e-4154-11eb-11bf-a9b0a3a48040
 # ╟─02e816ee-415a-11eb-0250-4bd6a5f6cb4a
+# ╟─a414898a-45ba-11eb-0161-5b519c16d585
+# ╟─55965e12-41ac-11eb-2bc6-e5c3d4cef731
+# ╟─24f5cf62-45bb-11eb-3961-f982843bfa88
+# ╟─37408ee8-45bb-11eb-16fe-473ae98a2700
 # ╟─3124e682-41bd-11eb-001a-6d6ce348f0b1
 # ╟─1d007b74-415b-11eb-1795-77f7221ae017
-# ╟─55965e12-41ac-11eb-2bc6-e5c3d4cef731
 # ╟─36fc50ee-415a-11eb-239f-8308d348bd3a
 # ╟─339f9e22-41be-11eb-1ea9-1b2583945bf6
 # ╟─6e24a652-41be-11eb-3699-f553c77ff31b
@@ -586,3 +673,4 @@ We see that a larger number of consumers rush to the price ceil, and that causes
 # ╟─31988b6a-41e9-11eb-33e2-d59ff1e77477
 # ╟─58d75242-41e9-11eb-08f2-2b370a268a87
 # ╟─d86b02c2-41ee-11eb-3bc0-b1e33a80922f
+# ╟─49e61a86-45de-11eb-224d-d1ad42f92225

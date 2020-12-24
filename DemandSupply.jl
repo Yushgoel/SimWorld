@@ -17,8 +17,7 @@ end
 begin
 	import Pkg
 	Pkg.activate(mktempdir())
-	Pkg.add(["PlutoUI",
-		"Plots"])
+	Pkg.add(["PlutoUI", "Plots"])
 
 	using PlutoUI
 	using Plots

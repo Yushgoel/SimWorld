@@ -23,6 +23,7 @@ begin
 	using PlutoUI
 	using Plots
 	gr()
+	println("")
 end
 
 # ╔═╡ de91c494-41bc-11eb-3d49-6d14bfde3453
@@ -236,9 +237,9 @@ md"""
 
 Now let's examine the impact of a government policy on the free market. It is repeated time and again that any intervention in free markets (often) leads to inefficiencies in the market. Let's simulate this and see if the claim is right.
 
-The first government policy we will examine is tax. This tax is special as it is only charged when a good is sold. Also, here we will assume that the government expects the producers to pay the tax at the end of the day (the producers are well aware of this policy change).
+The first government policy we will examine is tax. We will simulate specific indirect tax, which is levied when the good is sold and is constant irrespective of the price. Also, here we will assume that the government expects the producers to pay the tax at the end of the day (the producers are well aware of this policy change).
 
-The slider below will allow you to control the amount of tax levied. Now, a thing to note is that the abilities of the producers has changed. For example, let's assume that there is a tax of 0.1. Now, originally a producer who had a limit of 0.2 could have sold a product at 0.21 and still gone home with a profit. But now, if he sells the same product for 0.21, he has to pay the tax of 0.1, so goes home with only 0.11, which is less than his limit of 0.2. Thus, every producers limit increases by the value of the supply curve. Why? Because once they make the trade at this price, they pay away the tax and end up at the original supply curve limit.
+The slider below will allow you to control the amount of tax levied. Now, a thing to note is that the limits of the producers (the supply curve) has changed. For example, let's assume that there is a tax of 0.1. Now, originally a producer who had a limit of 0.2 could have sold a product at 0.21 and still gone home with a profit. But now, if he sells the same product for 0.21, he has to pay the tax of 0.1, so goes home with only 0.11, which is less than his limit of 0.2. Thus, every producer's limit increases by the value of the supply curve. Why? Because once they make the trade at this price, they pay away the tax and end up at the original supply curve limit.
 
 Let's denote this new limit (Supply curve + tax) with a green line.
 
@@ -246,7 +247,7 @@ Finally, let's run the simulation and see what happens:
 """
 
 # ╔═╡ 33c230c2-41b6-11eb-3626-e3741c798f1b
-md""" Tax Amount $(@bind tax Slider(0:0.01:0.25, show_value=true))"""
+md""" Tax Amount $(@bind tax Slider(0:0.01:0.25, show_value=true, default=0.1))"""
 
 # ╔═╡ 246aba7c-41b6-11eb-03b0-3fe2498642fa
 begin
@@ -367,7 +368,7 @@ However, price floors are not as straightforward as taxes as we even have to con
 
 	When a price floor is placed above market price, more producers are able to produce and sell at that minimum price, but less consumers are able to buy. Thus, too much of the good is produced, and something has to be done. In the caase of product markets, the government often just buys all of this surplus, which is what we will simulate here.
 
-The logic here is going to be simple. Trading will continue on as it was before, but will have one resitriction: if the consumer price is not more than the price floor, then the trade will not occur. This is because if the consumer price is lower, then the trade becomes illegal (for the sake of simplicity, we won't consider any underground markets where such a transaction is possible, only a fully legal and regulated market).
+The logic here is going to be simple. Trading will continue on as it was before, but will have one restriction: if the consumer price is not more than the price floor, then the trade will not occur. This is because if the consumer price is lower, then the trade becomes illegal (for the sake of simplicity, we won't consider any underground markets where such a transaction is possible, only a fully legal and regulated market).
 
 
 Below is the slider for the price floor (which corresponds to the green line of the graph). You can change it and watch the simulation adapt. (the price floor will only matter if placed above the equilibrium price).
@@ -482,7 +483,7 @@ If you play with the simulation, you should notice 2 different scenarios:
 1. If the price floor is below the market price, nothing happens and it is essentially the free market all over again.
 	This intuitively makes sense as consumers and producers are already making transactions at a price higher than the price floor, so it doesn't make a difference to them.
 
-2. When the price floor is above market price, a large number of producers start participating and very few consumers.
+2. When the price floor is above market price, a large number of producers but a small number of consumers are participating in the market.
 	This also makes sense as now when the price floor is above the market price, more producers are able to produce and sell. Producers don't even need to decrease their expectations when a consumer doesn't buy from them since the government will have to do it at the price floor anyway.
 
 Looking at the surplus, we see that the producer surplus has gone up dramatically, but the consumer surplus has gone down even more. That's why, in the end the market surplus is still less than the free market economy.
@@ -495,9 +496,9 @@ md"""
 
 Price Ceiling are exactly the opposite as price floors. Instead of having a minimum transaction price, there is now a maximum transaction price.
 
-In Price Floors, we realized that there was a surplus created since more producers are able to produce. In price ciels, there is a shortage created, as now many more consumers can afford to buy the good, but there are very few producers.
+In Price Floors, we realized that there was a surplus created since more producers are able to produce. In Price Ceils, there is a shortage created, as now many more consumers can afford to buy the good, but there are very few producers.
 
-Unlike the Price Floor, the government can't easily step in and fix this shortage. If they tried, they would have to find producers to buy from or hire them, but they would rather sell it in the market! However, there is still an opportunity to import the good.
+In the Price Floor, we saw that the government could step in and buy the surplus of the producers. But in the Price Ceil, the government can't easily fix the shortage. If they tried, they would have to find producers to buy from or hire them, but there are no more producers left (as they are all in the market)! However, there is still an opportunity to import the good.
 
 For this reason, we will just assume that the government doesn't step in.
 
@@ -621,7 +622,7 @@ Once again, we notice 2 different cases in the simulation:
 
 2. If the price ceil is below the market price, a large number of consumers want to participate, but only a few producers are left. 
 
-	This seems intuitive as well since now the product's price falls within the limits for more consumers. A think to note here is that just because all of the consumers expectations fall to the price ceil, it doesn't mean that all of them are able to buy the good, only some are. In fact, in the price floor, everyone had settled quickly since the government was buying the excess. Here, there is still some movement, so this is slightly more unstable.
+	This seems intuitive as well since now the product's price falls within the limits for more consumers. A thing to note here is that just because all of the consumers'  expectations fall to the price ceil, it doesn't mean that all of them are able to buy the good, only some are. In fact, in the price floor, everyone had settled quickly since the government was buying the excess. Here, there is still some movement, so this is slightly more unstable.
 
 While you would expect consumer surplus to increase drastically, it doesn't. This is again due to the fact that the government isn't filling in the shortage, so not all consumers get the benefit of the low price. Overall, the market surplus also goes down.
 """
